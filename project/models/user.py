@@ -6,3 +6,6 @@ class User(UserMixin, db.Model):
     email = db.Column(db.String(100))
     password = db.Column(db.String(100))
     name = db.Column(db.String(100))
+
+    def from_dict(data):
+        return User(id=data["id"], name=data["name"], email=data["email"])

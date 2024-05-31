@@ -1,14 +1,17 @@
-from flask import Flask
+from flask import Flask, request
 from flask_login import LoginManager
-from .models import db
+from config import API_URL
+# from .models.user import User
+
+
 
 def create_app():
     app = Flask(__name__, template_folder='templates')
     
     app.config['SECRET_KEY'] = 'secret_key'
-    app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///db.sqlite"
+    # app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///db.sqlite"
 
-    db.init_app(app)
+    # db.init_app(app)
     
     login_manager = LoginManager()
     login_manager.login_view = 'auth.login'
@@ -18,7 +21,11 @@ def create_app():
 
     @login_manager.user_loader
     def load_user(user_id):
-        return User.query.get(int(user_id))    
+        response = request.get(f"{API_URL}/users/{user_id}")    
+        if response.status_code == 200:
+            data = response.json()
+            return User.from_dict(data)
+        return None
     
     from .main import main as main_blueprint
     app.register_blueprint(main_blueprint)
