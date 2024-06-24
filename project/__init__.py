@@ -1,6 +1,8 @@
 from flask import Flask, request
 from flask_login import LoginManager
 from config import API_URL
+import requests
+
 # from .models.user import User
 
 
@@ -21,7 +23,7 @@ def create_app():
 
     @login_manager.user_loader
     def load_user(user_id):
-        response = request.get(f"{API_URL}/users/{user_id}")    
+        response = requests.get(f"{API_URL}/users/{user_id}")    
         if response.status_code == 200:
             data = response.json()
             return User.from_dict(data)

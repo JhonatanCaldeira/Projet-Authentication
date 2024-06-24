@@ -48,16 +48,24 @@ def login_post():
     remember = request.form.get('remember')
     
     # is user exists
-    user = User.query.filter_by(email=email).first()
-    check_password = check_password_hash(user.password, password)
-    if user and check_password:
-        login_user(user, remember=remember)
-        return redirect(url_for('main.profile'))
-        
-    else:
-        flash(" Please check your login details and try again")
-        return render_template('auth/login.html')
 
+    response = requests.post(f"{API_URL}/users",
+                        json={
+                            "email": email,
+                            "password": password
+                        },
+                        headers=headers)    
+
+    if response.status_code == 400:
+        error = response.json().get('error')
+        flash(error)
+        #flash(" Please check your login details and try again")
+        return render_template('auth/login.html')
+    
+    login_user(User.from_dict(response.json()), remember=remember)
+    return redirect(url_for('main.profile'))
+        
+    
 @auth.route('/logout')
 @login_required
 def logout():
